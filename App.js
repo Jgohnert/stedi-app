@@ -79,7 +79,7 @@ return(
             headers:{
               'content-type':'application/text'
             }
-            body: 
+            body
           })
           setLoggedInState(loggedInStates.CODE_SENT)
         }}
