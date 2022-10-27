@@ -1,59 +1,104 @@
 import React, { useEffect, useState, } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage } from 'react-native';
-import  Navigation from './components/Navigation';
+import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage, TextInput, Button } from 'react-native';
+import Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
 import Home from './screens/Home';
 import { NavigationContainer } from '@react-navigation/native';
-import { Button } from 'react-native-paper';
+
 
 
 
 const AppStack = createNativeStackNavigator();
+const loggedInStates={
+  NOT_LOGGED_IN: "NOT_LOGGED_IN",
+  LOGGED_IN: "LOGGED_IN",
+  CODE_SENT: "CODE_SENT"
+}
 
 const App = () =>{
   const [isFirstLaunch, setFirstLaunch] = React.useState(true);
-  const [isLoggedIn,setIsLoggedIn] = React.uselists[false];
+  const [loggedInState, setIsLoggedIn] = React.useState(loggedInStates.NOT_LOGGED_IN);
   const [homeTodayScore, setHomeTodayScore] = React.useState(0);
+  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [oneTimePassword, setOneTimePassword] = React.useState(null);
 
    if (isFirstLaunch == true){
 return(
   <OnboardingScreen setFirstLaunch={setFirstLaunch}/>
- 
 );
-  }else if(isLoggedIn){
-    return <Navigation/>
-  } else{
-    return(
-      <View>
-        <TextInput style={style.input}
-        PlaceholderTextColor='#4251f5'
-        placeholder='Phone Number'>
-        </TextInput>
-        <Button
-        title='Send'
-          style={style.button}
-          onPress={()=>{
-            console.log('Button was pressed!')
-          }}
-        />
-      </View>
-    )
-  }
-}
- export default App;
+} else if(loggedInSates == loggedInStates.LOGGED_IN){
+  return <Navigation/>
 
-const style = StyleSheet.create({
+} else if (loggedInState == loggedInStates.NOT_LOGGED_IN) {
+  return (
+    <View>
+      <TextInput 
+        placeholder='Cell Phone'>   
+        style={styles.input}  
+        placeholderTextColor='#4251f5' 
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}   
+      </TextInput>
+      <Button
+      title='Send'
+      style={styles.button}
+      onPress={async()=>{
+          console.log('Button was pressed!')
+          await fetch('http://dev.stedi.me/twofactorlogin/'+phoneNumber,
+          {
+            method:'POST',
+            headers:{
+              'content-type':'application/text'
+            }
+          })
+          setLoggedInState(loggedInStates.CODE_SENT)
+        }}
+      />
+    </View>
+  )}
+  else if (loggedInState == loggedInStates.CODE_SENT) {
+    return (
+    <View>
+      <TextInput
+        style={styles.input}
+        placeholderTextColor='#4251f5'
+        placeholder = 'One Time Password'
+        value = {oneTimePassword}
+        keyboardType = "numeric"
+      ></TextInput>
+      <Button
+      title='Login'
+      style={styles.button}
+      onPress={async()=>{
+          console.log('Login Button was pressed!')
+          await fetch
+          ('http://dev.stedi.me/twofactorlogin',
+          {
+            method:'POST',
+            headers:{
+              'content-type':'application/text'
+            }
+            body: 
+          })
+          setLoggedInState(loggedInStates.CODE_SENT)
+        }}
+      />
+    </View>
+  )}
+}
+  export default App;
+
+ const styles = StyleSheet.create({
   container:{
-    flex:1,
-    alignItems:'center',
-    justifycontent: 'center'
+      flex:1, 
+      alignItems:'center',
+      justifyContent: 'center'
   },
   input: {
     height: 40,
-    marginsTop:100,
     margin: 12,
-    borderwidth: 1,
+    borderWidth: 1,
     padding: 10,
   },
   margin:{
@@ -61,7 +106,7 @@ const style = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    backgroundColor: "#000000",
+    backgroundColor: "#DDDDDD",
     padding: 10
-  }
+  }    
 })
