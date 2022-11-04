@@ -1,10 +1,11 @@
 import React, { useEffect, useState, } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage, TextInput, Button, Alert } from 'react-native';
 import Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
 import Home from './screens/Home';
 import { NavigationContainer } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -18,7 +19,7 @@ const loggedInStates={
 
 const App = () =>{
   const [isFirstLaunch, setFirstLaunch] = React.useState(true);
-  const [loggedInState, setIsLoggedIn] = React.useState(loggedInStates.NOT_LOGGED_IN);
+  const [loggedInState, setLoggedInState] = React.useState(loggedInStates.NOT_LOGGED_IN);
   const [homeTodayScore, setHomeTodayScore] = React.useState(0);
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const [oneTimePassword, setOneTimePassword] = React.useState(null);
@@ -27,25 +28,27 @@ const App = () =>{
 return(
   <OnboardingScreen setFirstLaunch={setFirstLaunch}/>
 );
-} else if(loggedInSates == loggedInStates.LOGGED_IN){
+} else if(loggedInState == loggedInStates.LOGGED_IN){
   return <Navigation/>
 
 } else if (loggedInState == loggedInStates.NOT_LOGGED_IN) {
   return (
+    
     <View>
       <TextInput 
-        placeholder='Cell Phone'>   
+        placeholder='Cell Phone'   
         style={styles.input}  
         placeholderTextColor='#4251f5' 
         value={phoneNumber}
-        onChangeText={setPhoneNumber}   
+        onChangeText={setPhoneNumber}
+        keyboardType = 'numeric'>   
       </TextInput>
       <Button
       title='Send'
       style={styles.button}
       onPress={async()=>{
           console.log('Button was pressed!')
-          await fetch('http://dev.stedi.me/twofactorlogin/'+phoneNumber,
+          await fetch('https://dev.stedi.me/twofactorlogin/'+phoneNumber,
           {
             method:'POST',
             headers:{
@@ -53,6 +56,7 @@ return(
             }
           })
           setLoggedInState(loggedInStates.CODE_SENT)
+          
         }}
       />
     </View>
@@ -64,24 +68,35 @@ return(
         style={styles.input}
         placeholderTextColor='#4251f5'
         placeholder = 'One Time Password'
-        value = {oneTimePassword}
-        keyboardType = "numeric"
-      ></TextInput>
+        value={oneTimePassword}
+        onChangeText={setOneTimePassword}
+        keyboardType = "numeric">
+
+        </TextInput>
       <Button
       title='Login'
       style={styles.button}
       onPress={async()=>{
           console.log('Login Button was pressed!')
-          await fetch
-          ('http://dev.stedi.me/twofactorlogin',
+          const loginResponse=await fetch('https://dev.stedi.me/twofactorlogin', 
           {
             method:'POST',
             headers:{
               'content-type':'application/text'
-            }
-            body
+            },
+            body:JSON.stringify({
+              phoneNumber,
+              oneTimePassword
+            })
           })
-          setLoggedInState(loggedInStates.CODE_SENT)
+          console.log ("loginresponsestatus", loginResponse.status)
+          console.log ("phonenumber", phoneNumber)
+          console.log ("onetimepassword", oneTimePassword)
+          if(loginResponse.status==200){
+            setLoggedInState(loggedInStates.LOGGED_IN);
+          } /*else{
+            setLoggedInState(loggedInStates.NOT_LOGGED_IN);
+          }*/
         }}
       />
     </View>
@@ -99,6 +114,7 @@ return(
     height: 40,
     margin: 12,
     borderWidth: 1,
+    marginTop: 100,
     padding: 10,
   },
   margin:{
