@@ -1,5 +1,5 @@
 import React, { useEffect, useState, } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Button, Alert } from 'react-native';
 import Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -23,6 +23,27 @@ const App = () =>{
   const [homeTodayScore, setHomeTodayScore] = React.useState(0);
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const [oneTimePassword, setOneTimePassword] = React.useState(null);
+
+  useEffect(()=>{
+    const getSessionToken = async()=>{
+    const sessionToken = await AsyncStorage.getItem('sessionTpken');
+    console.log('sessionToken', sessionToken);
+    const validateResponse = await fetch('https://dev.stedi.me/validate/'+sessionToken,
+    {
+      method: 'GET',
+      headers: {
+       'content-type': 'application/test'
+    }
+  });
+
+  if(validateResponse.status==200) {
+    const userName =await validateResponse.tesxt();
+    await AsyncStorage.setItem('unserName', userName);
+    setLoggedInState(loggedInStates.LOGGED_IN);
+  }
+  }
+  getSessionToken();
+});
 
    if (isFirstLaunch == true){
 return(
@@ -88,15 +109,20 @@ return(
               phoneNumber,
               oneTimePassword
             })
-          })
+          });
+          if(loginResponse.status==200){
+            const sessionToken = await loginResponse.text();
+            await AsyncStorage.setItem('sessionToken', sessionToken);
+            setLoggedInState(loggedInState.LOGGED_IN);
+          }else{
+            setLoggedInState(NOT_LOGGED_IN);
+          }
           console.log ("loginresponsestatus", loginResponse.status)
           console.log ("phonenumber", phoneNumber)
           console.log ("onetimepassword", oneTimePassword)
           if(loginResponse.status==200){
             setLoggedInState(loggedInStates.LOGGED_IN);
-          } /*else{
-            setLoggedInState(loggedInStates.NOT_LOGGED_IN);
-          }*/
+          }
         }}
       />
     </View>
