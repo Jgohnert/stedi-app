@@ -27,7 +27,7 @@ const App = () =>{
 
   useEffect(()=>{
     const getSessionToken = async()=>{
-    const sessionToken = await AsyncStorage.getItem('sessionTpken');
+    const sessionToken = await AsyncStorage.getItem('sessionToken');
     console.log('sessionToken', sessionToken);
     const validateResponse = await fetch('https://dev.stedi.me/validate/'+sessionToken,
     {
@@ -38,8 +38,8 @@ const App = () =>{
   });
 
   if(validateResponse.status==200) {
-    const userName =await validateResponse.tesxt();
-    await AsyncStorage.setItem('unserName', userName);
+    const userName =await validateResponse.text();
+    await AsyncStorage.setItem('userName', userName);
     setLoggedInState(loggedInStates.LOGGED_IN);
   }
   }
@@ -113,10 +113,11 @@ return(
           });
           if(loginResponse.status==200){
             const sessionToken = await loginResponse.text();
+            console.log ("session Token", sessionToken)
             await AsyncStorage.setItem('sessionToken', sessionToken);
-            setLoggedInState(loggedInState.LOGGED_IN);
+            setLoggedInState(loggedInStates.LOGGED_IN);
           }else{
-            setLoggedInState(NOT_LOGGED_IN);
+            setLoggedInState(loggedInState.NOT_LOGGED_IN);
           }
           console.log ("loginresponsestatus", loginResponse.status)
           console.log ("phonenumber", phoneNumber)

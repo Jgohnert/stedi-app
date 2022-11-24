@@ -24,7 +24,7 @@ import {camera} from 'expo-camera';
 const Profile = (props) => {
   useEffect(()=>{
     const getUserInfo = async ()=>{
-      const cameraPermission = await Camera.requestCameraPermissionsAsync();
+      const cameraPermission = await camera.requestcameraPermissionsAsync();
     };
     getUserInfo();
   },[]);
