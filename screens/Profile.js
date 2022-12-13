@@ -1,11 +1,9 @@
-
-import React, { useEffect,useRef } from 'react';
+import React, { useEffect,useRef, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, Image, SafeAreaView , Share, ScrollView, Button} from 'react-native';
 import { Card, CardTitle, CardContent} from 'react-native-material-cards';
 import BarChart from 'react-native-bar-chart';
 import {Camera,CameraType} from 'expo-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState } from 'react';
 
 // import Share from 'react-native-share';
 
@@ -35,11 +33,10 @@ const Profile = (props) => {
   useEffect(()=>{
     const getUserInfo = async ()=>{
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      const UserName = await AsyncStorage.getItem('userName');
+      const userName = await AsyncStorage.getItem('userName');
       console.log('userName',userName);
       setUserName(userName);
       const profilePhoto = await AsyncStorage.getItem('profilePhoto');
-      const userName = await AsyncStorage.getItem('userName');
       setProfilePhoto(profilePhoto);
       
     };
@@ -93,8 +90,8 @@ shadowRadius: 2.62,
 elevation: 4}}>
      <CardContent>
      <Image style={{height: 100, width:100, borderRadius: 75}}
-      source={require('../image/me.jpg')} />
-    <Text style={{marginTop:10,marginBottom:10,fontWeight: 'bold'}}>Sarah Romero</Text>
+      source={{uri:profilePhoto}} />
+    <Text style={{marginTop:10,marginBottom:10,fontWeight: 'bold'}}>{userName}</Text>
 
     <Text style={{marginTop:20,marginBottom:2}}>This Week's progress</Text>
 {/* <BarChart barColor='green' data={data} horizontalData={horizontalData} /> */}
@@ -112,7 +109,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 65,
+    padding: 75,
   },
   camera: {
     flex: 1,

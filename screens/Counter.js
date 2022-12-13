@@ -10,6 +10,8 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage, button
 import exerciseImg from '../image/exercise2.png';
 import ProgressBar from 'react-native-progress/Bar';
 import { FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // import { Ionicons} from 'react-native-vector-icons';
 // import { Button } from 'react-native-elements';
 // import { IconButton } from 'react-native-paper';
@@ -19,6 +21,16 @@ export default function Counter(props) {
  const [completionCount, setCompletionCount] = useState(0);
  const [counter, setCounter] = useState(3); //(180 3 mins)
  const [score, setScore] = useState(0);
+
+ useEffect(()=>{
+  const getUserName = async ()=>{
+    userName.current= await AsyncStorage.getItem('userName');
+    console.log('Counter userName',userName.current);    
+    token.current = await AsyncStorage.getItem('sessionToken');
+   console.log('counter token:' ,token.current);
+  };
+  getUserName();
+},[]);
 
  const [currentScreen, setCurrentScreen] = useState('counter');
 useEffect(()=>{
@@ -68,7 +80,7 @@ const startTime = useRef(0);
 const stopTime = useRef(0);
 const testTime = useRef(0);
 const token = useRef("");
-const userName = useRef();
+const userName = useRef("");
 
 
 const savingSteps = async(event) =>{
@@ -90,17 +102,17 @@ stepPoints  = [];
 }); 
 stepPoints.length=30;
   try{
-    const sessionToken = await AsyncStorage.getItem('sessionToken')
-    const username = await useAsyncStorage.getItem('userName')
-    userName.current = userName;
-    token.current = sessionToken
-console.log('token counter:' ,token.current);
-await fetch('https://dev.stedi.me/rapidsteptest',{
-  method:'POST',
-  headers:{
-    'Content-Type': 'application/json',
-   'suresteps.session.token': token.current
-  },
+    token.current = await AsyncStorage.getItem('sessionToken');
+    userName.current =await AsyncStorage.getItem('userName');
+  console.log('token:' ,token.current);
+  await fetch('https://dev.stedi.me/rapidsteptest',{
+    method:'POST',
+    headers:{
+      'Content-Type': 'application/json',
+      'suresteps.session.token': token.current
+ },
+
+
   body:JSON.stringify({
 customer: userName.current,
 startTime: startTime.current,
@@ -121,17 +133,18 @@ totalSteps:30
 const getResults = async () =>{
 
 try{
-  const scoreResponse = await fetch('https://dev.stedi.me/riskscore/'+userName.current, {
+  console.log('UserName:'+userName.current);
+  console.log('Token before calling score:'+token.current);
+  const scoreResponse = await fetch('https://dev.stedi.me/riskscore/'+userName.current,{
   method:'GET',
   headers:{
     'Content-Type': 'application/json',
-   'suresteps.session.token': token.current
+    'suresteps.session.token': token.current
   }
 })
 const scoreObject = await scoreResponse.json();
 console.log("score:",scoreObject.score);
 setScore(scoreObject.score);
-props.setHomeTodayScore(scoreObject.score);
 }catch(error){
   console.log('error', error);
  }
@@ -250,7 +263,7 @@ console.log('Error', error)
     steps.current=steps.current.concat(spikes);
     // console.log("Steps after: "+steps.current.length);
     recentAccelerationData.current=[];
-   if( steps.current.length >= 30) {
+   if( steps.current.length <= 30) {
     console.log("_unsubscribe");
     setStepCount(0);
    await savingSteps();
@@ -395,7 +408,7 @@ subtitle={messageOutcome()}
       style={styles.button2}>
         <Text>close</Text>
       </TouchableOpacity>
-      <Text  style={{textAlign:'center', color: '#0000EE'}} onPress={() => Linking.openURL(url)}>More info</Text>
+      <Text style={{textAlign:'center', color: '#0000EE'}} onPress={() => Linking.openURL(url)}>More info</Text>
      </CardContent>
     </Card>
          </View>
